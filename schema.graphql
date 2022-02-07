@@ -38,6 +38,7 @@ type Token @entity {
   mintTx: String!
   owner: Player!
   isStaked: Boolean!
+  stakedAt: BigInt
 }
 
 type StolenToken @entity {

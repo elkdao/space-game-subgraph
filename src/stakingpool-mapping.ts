@@ -9,6 +9,7 @@ import { loadGame, tokenIdErc721 } from './util/helpers';
 import {
   MNA_CONTRACT,
   ONE_BI,
+  ZERO_BI,
 } from './util/constants';
 
 export function handleTokenStaked(event: TokenStaked): void {
@@ -31,6 +32,8 @@ export function handleTokenStaked(event: TokenStaked): void {
   // Therefore the owner must be reset to be the original owner
   token.owner = owner;
   token.isStaked = true;
+  token.stakedAt = event.block.timestamp;
+  token.save();
 
   const game = loadGame();
   if (isMarine) {
@@ -39,8 +42,7 @@ export function handleTokenStaked(event: TokenStaked): void {
     game.aliensStaked = game.aliensStaked.plus(ONE_BI);
   }
 
-
-  token.save();
+  game.save();
 }
 
 function handleClaim(isMarine: boolean, tokenId: string, isUnstaked: boolean, oresClaimed: BigInt): void {
@@ -57,6 +59,7 @@ function handleClaim(isMarine: boolean, tokenId: string, isUnstaked: boolean, or
 
   if (isUnstaked) {
     token.isStaked = false;
+    token.stakedAt = ZERO_BI;
     token.save();
 
     const game = loadGame();

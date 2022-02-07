@@ -48,6 +48,7 @@ function initToken(id: string, tokenId: BigInt, name: string, owner: string, tx:
   token.balance = ONE_BI;
   token.owner = owner;
   token.isStaked = false;
+  token.stakedAt = ZERO_BI;
   token.mintTx = tx;
 
   return token;
