@@ -25,8 +25,8 @@ type Player @entity {
   mints: BigInt!
   tokensOwned: BigInt!
   tokens: [Token!]! @derivedFrom(field: "owner")
-  tokensLost: [StolenToken!]! @derivedFrom(field: "victim")
-  tokensStolen: [StolenToken!]! @derivedFrom(field: "thief")
+  tokensLost: [Token!]! @derivedFrom(field: "victim")
+  tokensStolen: [Token!]! @derivedFrom(field: "thief")
   oresClaimed: BigInt!
 }
 
@@ -36,16 +36,10 @@ type Token @entity {
   tokenId: BigInt!
   balance: BigInt!
   mintTx: String!
+  mintedAt: BigInt!
   owner: Player!
   isStaked: Boolean!
   stakedAt: BigInt
-}
-
-type StolenToken @entity {
-  id: ID!
-  name: String!
-  tokenId: BigInt!
-  thief: Player!
-  victim: Player!
-  mintTx: String!
+  victim: Player
+  thief: Player
 }

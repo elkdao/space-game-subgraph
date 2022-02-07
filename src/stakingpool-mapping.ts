@@ -4,7 +4,7 @@ import {
   MarineClaimed,
   TokenStaked,
 } from '../generated/StakingPool/StakingPool'
-import { Game, Player, Token, StolenToken } from '../generated/schema'
+import { Game, Player, Token } from '../generated/schema'
 import { loadGame, tokenIdErc721 } from './util/helpers';
 import {
   MNA_CONTRACT,

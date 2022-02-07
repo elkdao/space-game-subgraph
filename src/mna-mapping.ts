@@ -1,23 +1,19 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 import {
-  AlienBurned,
   AlienMinted,
   AlienStolen,
   Transfer,
-  MarineBurned,
   MarineMinted,
   MarineStolen,
 } from '../generated/MnA/MnA'
 
-import { Game, Player, Token, StolenToken } from '../generated/schema'
+import { Game, Player, Token } from '../generated/schema'
 
 import {
   ADDRESS_ZERO,
-  GAME_ID,
   NAME_ALIEN,
   NAME_MARINE,
   ONE_BI,
-  STAKING_POOL_CONTRACTS,
   ZERO_BI,
 } from './util/constants'
 import { loadGame, tokenIdErc721 } from './util/helpers';
@@ -41,7 +37,7 @@ function initPlayer(id: string): Player {
   return player;
 }
 
-function initToken(id: string, tokenId: BigInt, name: string, owner: string, tx: string): Token {
+function initToken(id: string, tokenId: BigInt, name: string, owner: string, tx: string, mintedAt: BigInt): Token {
   const token = new Token(id);
   token.name = name;
   token.tokenId = tokenId;
@@ -50,6 +46,7 @@ function initToken(id: string, tokenId: BigInt, name: string, owner: string, tx:
   token.isStaked = false;
   token.stakedAt = ZERO_BI;
   token.mintTx = tx;
+  token.mintedAt = mintedAt;
 
   return token;
 };
@@ -74,6 +71,7 @@ function decrementTokensOwned(player: Player, token: Token): void {
 
 function handleTokenMinted(
   tx: string,
+  timestamp: BigInt,
   callerAddress: string,
   contractAddress: string,
   tokenId: BigInt,
@@ -101,6 +99,7 @@ function handleTokenMinted(
     name,
     caller.id,
     tx,
+    timestamp,
   );
 
   token.save();
@@ -110,8 +109,14 @@ export function handleAlienMinted(event: AlienMinted): void {
   const callerAddress = event.transaction.from.toHexString();
   const contractAddress = event.address.toHexString();
   const tokenId = event.params.tokenId;
-  const tx = event.transaction.hash.toHexString();
-  handleTokenMinted(tx, callerAddress, contractAddress, tokenId, NAME_ALIEN);
+  handleTokenMinted(
+    event.transaction.hash.toString(),
+    event.block.timestamp,
+    callerAddress,
+    contractAddress,
+    tokenId,
+    NAME_ALIEN
+  );
 
   const game = loadGame();
   game.aliensMinted = game.aliensMinted.plus(ONE_BI);
@@ -122,29 +127,18 @@ export function handleMarineMinted(event: MarineMinted): void {
   const callerAddress = event.transaction.from.toHexString();
   const contractAddress = event.address.toHexString();
   const tokenId = event.params.tokenId;
-  const tx = event.transaction.hash.toHexString();
-  handleTokenMinted(tx, callerAddress, contractAddress, tokenId, NAME_MARINE);
+  handleTokenMinted(
+    event.transaction.hash.toString(),
+    event.block.timestamp,
+    callerAddress,
+    contractAddress,
+    tokenId,
+    NAME_MARINE
+  );
 
   const game = loadGame();
   game.marinesMinted = game.marinesMinted.plus(ONE_BI);
   game.save();
-}
-
-function initStolenToken(
-  id: string,
-  tokenId: BigInt,
-  victim: string,
-  mintTx: string,
-  isMarine: boolean,
-): StolenToken {
-  const stolenToken = new StolenToken(id);
-  stolenToken.tokenId = tokenId;
-  stolenToken.thief = ''; // unknown at this point
-  stolenToken.victim = victim;
-  stolenToken.mintTx = mintTx;
-  stolenToken.name = isMarine ? NAME_MARINE : NAME_ALIEN;
-
-  return stolenToken;
 }
 
 function handleAlienStolen(event: AlienStolen): void {
@@ -164,8 +158,13 @@ function handleAlienStolen(event: AlienStolen): void {
   const contractAddress = event.address.toHexString();
   const tokenId = event.params.tokenId;
   const compositeTokenId = tokenIdErc721(contractAddress, tokenId.toString());
-  const stolenToken = initStolenToken(compositeTokenId, tokenId, callerAddress, event.transaction.hash.toString(), false);
-  stolenToken.save();
+  const token = Token.load(compositeTokenId);
+  if (token == null) {
+    throw new Error('Cannot steal token that does not exist');
+  }
+
+  token.victim = callerAddress;
+  token.save();
 }
 
 function handleMarineStolen(event: MarineStolen): void {
@@ -185,8 +184,13 @@ function handleMarineStolen(event: MarineStolen): void {
   const contractAddress = event.address.toHexString();
   const tokenId = event.params.tokenId;
   const compositeTokenId = tokenIdErc721(contractAddress, tokenId.toString());
-  const stolenToken = initStolenToken(compositeTokenId, tokenId, callerAddress, event.transaction.hash.toString(), true);
-  stolenToken.save();
+  const token = Token.load(compositeTokenId);
+  if (token == null) {
+    throw new Error('Cannot steal token that does not exist');
+  }
+
+  token.victim = callerAddress;
+  token.save();
 }
 
 export function handleTransfer(event: Transfer): void {
@@ -224,14 +228,8 @@ export function handleTransfer(event: Transfer): void {
     decrementTokensOwned(prevOwner, token);
     prevOwner.save();
   } else if (to !== callerAddress) {
-    // This token was stolen, update StolenToken.thief now that we know who it is
-    const stolenToken = StolenToken.load(compositeTokenId);
-    if (stolenToken == null) {
-      throw new Error('Token was stolen but not tracked');
-    }
-
-    stolenToken.thief = to;
-    stolenToken.save();
+    // This token was stolen, update token.thief now that we know who it is
+    token.thief = to;
 
     // increment aliens / marines stolen
     if (token.name === NAME_MARINE) {
