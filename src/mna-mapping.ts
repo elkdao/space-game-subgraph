@@ -1,21 +1,23 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 import {
-  DragonBurned,
-  DragonMinted,
+  AlienBurned,
+  AlienMinted,
+  AlienStolen,
   Transfer,
-  WizardBurned,
-  WizardMinted,
-} from '../generated/WnD/WnD'
+  MarineBurned,
+  MarineMinted,
+  MarineStolen,
+} from '../generated/MnA/MnA'
 
-import { Game, Player, Token } from '../generated/schema'
+import { Game, Player, Token, StolenToken } from '../generated/schema'
 
 import {
   ADDRESS_ZERO,
   GAME_ID,
-  NAME_DRAGON,
-  NAME_WIZARD,
+  NAME_ALIEN,
+  NAME_MARINE,
   ONE_BI,
-  TOWER_CONTRACTS,
+  STAKING_POOL_CONTRACTS,
   ZERO_BI,
 } from './util/constants'
 
@@ -23,12 +25,12 @@ function loadGame(): Game {
   let game = Game.load(GAME_ID);
   if (game == null) {
     game = new Game(GAME_ID);
-    game.dragonsMinted = ZERO_BI;
-    game.dragonsStaked = ZERO_BI;
-    game.dragonsStolen = ZERO_BI;
-    game.wizardsMinted = ZERO_BI;
-    game.wizardsStaked = ZERO_BI;
-    game.wizardsStolen = ZERO_BI;
+    game.aliensMinted = ZERO_BI;
+    game.aliensStaked = ZERO_BI;
+    game.aliensStolen = ZERO_BI;
+    game.marinesMinted = ZERO_BI;
+    game.marinesStaked = ZERO_BI;
+    game.marinesStolen = ZERO_BI;
   }
 
   return game;
@@ -40,14 +42,14 @@ function tokenIdErc721(contract: string, tokenId: string): string {
 
 function initPlayer(id: string): Player {
   const player = new Player(id);
-  player.dragonsLost = ZERO_BI;
-  player.dragonsOwned = ZERO_BI;
-  player.dragonsStolen = ZERO_BI;
+  player.aliensLost = ZERO_BI;
+  player.aliensOwned = ZERO_BI;
+  player.aliensStolen = ZERO_BI;
   player.mints = ZERO_BI;
   player.tokensOwned = ZERO_BI;
-  player.wizardsLost = ZERO_BI;
-  player.wizardsOwned = ZERO_BI;
-  player.wizardsStolen = ZERO_BI;
+  player.marinesLost = ZERO_BI;
+  player.marinesOwned = ZERO_BI;
+  player.marinesStolen = ZERO_BI;
 
   return player;
 }
@@ -58,32 +60,42 @@ function initToken(id: string, tokenId: BigInt, name: string, owner: string, tx:
   token.tokenId = tokenId;
   token.balance = ONE_BI;
   token.owner = owner;
-  token.isStolen = false;
   token.isStaked = false;
   token.mintTx = tx;
 
   return token;
 };
 
+function initStolenToken(id: string, tokenId: BigInt, name: string, thief: string, victim: string, tx: string): StolenToken {
+  const token = new StolenToken(id);
+  token.tokenId = tokenId;
+  token.name = name;
+  token.thief = thief;
+  token.victim = victim;
+  token.mintTx = tx;
+
+  return token;
+}
+
 function isTokenStaked(newOwner: string): boolean {
-  return TOWER_CONTRACTS.has(newOwner.toLowerCase());
+  return STAKING_POOL_CONTRACTS.has(newOwner.toLowerCase());
 }
 
 function incrementTokensOwned(player: Player, token: Token): void {
   player.tokensOwned = player.tokensOwned.plus(ONE_BI);
-  if (token.name == NAME_WIZARD) {
-    player.wizardsOwned = player.wizardsOwned.plus(ONE_BI);
+  if (token.name == NAME_MARINE) {
+    player.marinesOwned = player.marinesOwned.plus(ONE_BI);
   } else {
-    player.dragonsOwned = player.dragonsOwned.plus(ONE_BI);
+    player.aliensOwned = player.aliensOwned.plus(ONE_BI);
   }
 }
 
 function decrementTokensOwned(player: Player, token: Token): void {
   player.tokensOwned = player.tokensOwned.minus(ONE_BI);
-  if (token.name == NAME_WIZARD) {
-    player.wizardsOwned = player.wizardsOwned.minus(ONE_BI);
+  if (token.name == NAME_MARINE) {
+    player.marinesOwned = player.marinesOwned.minus(ONE_BI);
   } else {
-    player.dragonsOwned = player.dragonsOwned.minus(ONE_BI);
+    player.aliensOwned = player.aliensOwned.minus(ONE_BI);
   }
 }
 
@@ -115,28 +127,27 @@ function handleTokenMinted(
   token.save();
 }
 
-export function handleDragonMinted(event: DragonMinted): void {
+export function handleAlienMinted(event: AlienMinted): void {
   const callerAddress = event.transaction.from.toHexString();
   const contractAddress = event.address.toHexString();
   const tokenId = event.params.tokenId;
   const tx = event.transaction.hash.toHexString();
-  handleTokenMinted(tx, callerAddress, contractAddress, tokenId, NAME_DRAGON);
+  handleTokenMinted(tx, callerAddress, contractAddress, tokenId, NAME_ALIEN);
 
   const game = loadGame();
-  game.dragonsMinted = game.dragonsMinted.plus(ONE_BI);
+  game.aliensMinted = game.aliensMinted.plus(ONE_BI);
   game.save();
 }
 
-// this should technically be WizardMinted
-export function handleWizardMinted(event: WizardMinted): void {
+export function handleMarineMinted(event: MarineMinted): void {
   const callerAddress = event.transaction.from.toHexString();
   const contractAddress = event.address.toHexString();
   const tokenId = event.params.tokenId;
   const tx = event.transaction.hash.toHexString();
-  handleTokenMinted(tx, callerAddress, contractAddress, tokenId, NAME_WIZARD);
+  handleTokenMinted(tx, callerAddress, contractAddress, tokenId, NAME_MARINE);
 
   const game = loadGame();
-  game.wizardsMinted = game.wizardsMinted.plus(ONE_BI);
+  game.marinesMinted = game.marinesMinted.plus(ONE_BI);
   game.save();
 }
 
@@ -145,10 +156,10 @@ function handleTokenStake(event: Transfer, token: Token): void {
   token.save();
 
   const game = loadGame();
-  if (token.name == NAME_WIZARD) {
-    game.wizardsStaked = game.wizardsStaked.plus(ONE_BI);
+  if (token.name == NAME_MARINE) {
+    game.marinesStaked = game.marinesStaked.plus(ONE_BI);
   } else {
-    game.dragonsStaked = game.dragonsStaked.plus(ONE_BI);
+    game.aliensStaked = game.aliensStaked.plus(ONE_BI);
   }
 
   game.save();
@@ -159,10 +170,10 @@ function handleTokenUnstake(event: Transfer, token: Token): void {
   token.save();
 
   const game = loadGame();
-  if (token.name == NAME_WIZARD) {
-    game.wizardsStaked = game.wizardsStaked.minus(ONE_BI);
+  if (token.name == NAME_MARINE) {
+    game.marinesStaked = game.marinesStaked.minus(ONE_BI);
   } else {
-    game.dragonsStaked = game.dragonsStaked.minus(ONE_BI);
+    game.aliensStaked = game.aliensStaked.minus(ONE_BI);
   }
 
   game.save();
@@ -183,10 +194,10 @@ function handleMintStake(event: Transfer, token: Token): void {
   token.save();
 
   const game = loadGame();
-  if (token.name == NAME_WIZARD) {
-    game.wizardsStaked = game.wizardsStaked.plus(ONE_BI);
+  if (token.name == NAME_MARINE) {
+    game.marinesStaked = game.marinesStaked.plus(ONE_BI);
   } else {
-    game.dragonsStaked = game.dragonsStaked.plus(ONE_BI);
+    game.aliensStaked = game.aliensStaked.plus(ONE_BI);
   }
 
   game.save();
@@ -206,14 +217,14 @@ function handleMintStolen(event: Transfer, token: Token): void {
   }
 
   const game = loadGame();
-  if (token.name == NAME_WIZARD) {
-    caller.wizardsLost = caller.wizardsLost.plus(ONE_BI);
-    thief.wizardsStolen = thief.wizardsStolen.plus(ONE_BI);
-    game.wizardsStolen = game.wizardsStolen.plus(ONE_BI);
+  if (token.name == NAME_MARINE) {
+    caller.marinesLost = caller.marinesLost.plus(ONE_BI);
+    thief.marinesStolen = thief.marinesStolen.plus(ONE_BI);
+    game.marinesStolen = game.marinesStolen.plus(ONE_BI);
   } else {
-    caller.dragonsLost = caller.dragonsLost.plus(ONE_BI);
-    thief.dragonsStolen = thief.dragonsStolen.plus(ONE_BI);
-    game.dragonsStolen = game.dragonsStolen.plus(ONE_BI);
+    caller.aliensLost = caller.aliensLost.plus(ONE_BI);
+    thief.aliensStolen = thief.aliensStolen.plus(ONE_BI);
+    game.aliensStolen = game.aliensStolen.plus(ONE_BI);
   }
 
   game.save();
@@ -223,8 +234,11 @@ function handleMintStolen(event: Transfer, token: Token): void {
   thief.save();
 
   token.owner = thief.id;
-  token.isStolen = true;
   token.save();
+
+  const tx = event.transaction.hash.toHexString();
+  const stolenToken = initStolenToken(token.id, token.tokenId, token.name, thief.id, caller.id, tx);
+  stolenToken.save();
 }
 
 function handleMint(event: Transfer, token: Token): void {
@@ -262,7 +276,6 @@ function handlePlayerTransfer(event: Transfer, token: Token): void {
   incrementTokensOwned(newOwner, token);
   newOwner.save();
 
-  token.isStolen = false;
   token.owner = newOwner.id;
   token.save();
 }
@@ -334,14 +347,14 @@ function handleTokenBurned(tokenId: string): void {
   token.save();
 }
 
-export function handleDragonBurned(event: DragonBurned): void {
+export function handleAlienBurned(event: AlienBurned): void {
   const contractAddress = event.address.toHexString();
   const tokenId = event.params.tokenId.toString();
   const compositeTokenId = tokenIdErc721(contractAddress, tokenId);
   handleTokenBurned(compositeTokenId);
 }
 
-export function handleWizardBurned(event: WizardBurned): void {
+export function handleMarineBurned(event: MarineBurned): void {
   const contractAddress = event.address.toHexString();
   const tokenId = event.params.tokenId.toString();
   const compositeTokenId = tokenIdErc721(contractAddress, tokenId);

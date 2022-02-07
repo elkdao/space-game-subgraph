@@ -1,38 +1,43 @@
 type Game @entity {
   id: ID!
-  dragonsMinted: BigInt!
-  dragonsStaked: BigInt!
-  dragonsStolen: BigInt!
-  wizardsMinted: BigInt!
-  wizardsStaked: BigInt!
-  wizardsStolen: BigInt!
+  aliensMinted: BigInt!
+  aliensStaked: BigInt!
+  aliensStolen: BigInt!
+  marinesMinted: BigInt!
+  marinesStaked: BigInt!
+  marinesStolen: BigInt!
 }
 
 type Player @entity {
   id: ID!
-  dragonsLost: BigInt!
-  dragonsOwned: BigInt!
-  dragonsStolen: BigInt!
+  aliensLost: BigInt!
+  aliensOwned: BigInt!
+  aliensStolen: BigInt!
   mints: BigInt!
-  wizardsLost: BigInt!
-  wizardsOwned: BigInt!
-  wizardsStolen: BigInt!
+  marinesLost: BigInt!
+  marinesOwned: BigInt!
+  marinesStolen: BigInt!
   tokensOwned: BigInt!
   tokens: [Token!]! @derivedFrom(field: "owner")
-}
-
-enum TokenName {
-  Wizard
-  Dragon
+  tokensLost: [StolenToken!]! @derivedFrom(field: "victim")
+  tokensStolen: [StolenToken!]! @derivedFrom(field: "thief")
 }
 
 type Token @entity {
   id: ID!
-  name: TokenName!
+  name: String!
   tokenId: BigInt!
   balance: BigInt!
   mintTx: String!
   owner: Player!
-  isStolen: Boolean!
   isStaked: Boolean!
+}
+
+type StolenToken @entity {
+  id: ID!
+  name: String!
+  tokenId: BigInt!
+  thief: Player!
+  victim: Player!
+  mintTx: String!
 }

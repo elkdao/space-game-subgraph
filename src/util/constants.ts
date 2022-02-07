@@ -8,9 +8,9 @@ export const ZERO_BD = BigDecimal.fromString('0')
 export const ONE_BD = BigDecimal.fromString('1')
 
 // Game constants
-export const GAME_ID = 'WnD';
-export const NAME_WIZARD = 'Wizard';
-export const NAME_DRAGON = 'Dragon';
+export const GAME_ID = 'MnA';
+export const NAME_ALIEN = 'Alien';
+export const NAME_MARINE = 'Marine';
 
-export const TOWER_CONTRACTS = new Set<string>();
-TOWER_CONTRACTS.add('0xf042a49fb03cb9d98cba9def8711cee85dc72281');
+export const STAKING_POOL_CONTRACTS = new Set<string>();
+STAKING_POOL_CONTRACTS.add('0xf042a49fb03cb9d98cba9def8711cee85dc72281');

@@ -3,35 +3,85 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: WnD
-    network: mainnet
+    name: MnA
+    network: polygon
     source:
-      address: "0x999e88075692bCeE3dBC07e7E64cD32f39A1D3ab"
-      abi: WnD
-      startBlock: 13717992
-      # startBlock: 13742917
+      address: "0xf042a49fb03cb9d98cba9def8711cee85dc72281" # placeholder
+      abi: MnA
+      # startBlock: 13717992
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - DragonBurned
-        - DragonMinted
+        - AlienBurned
+        - AlienMinted
+        - AlienStolen
+        - MarineBurned
+        - MarineMinted
+        - MarineStolen
         - Transfer
-        - WizardBurned
-        - WizardMinted
       abis:
-        - name: WnD
-          file: ./abis/WnD.json
+        - name: MnA
+          file: ./abis/MnA.json
       eventHandlers:
-        - event: DragonBurned(indexed uint256)
-          handler: handleDragonBurned
-        - event: DragonMinted(indexed uint256)
-          handler: handleDragonMinted
+        - event: AlienBurned(indexed uint256)
+          handler: handleAlienBurned
+        - event: AlienMinted(indexed uint256)
+          handler: handleAlienMinted
+        - event: MarineBurned(indexed uint256)
+          handler: handleMarineBurned
+        - event: MarineMinted(indexed uint256)
+          handler: handleMarineMinted
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
-        - event: WizardBurned(indexed uint256)
-          handler: handleWizardBurned
-        - event: WizardMinted(indexed uint256)
-          handler: handleWizardMinted
-      file: ./src/wnd-mapping.ts
+      file: ./src/mna-mapping.ts
+  - kind: ethereum
+    name: MnAGameCR
+    network: polygon
+    source:
+      address: "0xf042a49fb03cb9d98cba9def8711cee85dc72281" # placeholder
+      abi: MnAGameCR
+      # startBlock: 13717992
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - MintCommitted
+        - MintRevealed
+      abis:
+        - name: MnAGameCR
+          file: ./abis/MnAGameCR.json
+      eventHandlers:
+        - event: MintCommitted(indexed address,indexed uint256)
+          handler: handleMintCommitted
+        - event: MintRevealed(indexed address,indexed uint256)
+          handler: handleMintRevealed
+      file: ./src/mnagamecr-mapping.ts
+  - kind: ethereum
+    name: StakingPool
+    network: polygon
+    source:
+      address: "0xf042a49fb03cb9d98cba9def8711cee85dc72281" # placeholder
+      abi: StakingPool
+      # startBlock: 13717992
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - TokenStaked
+        - MarineClaimed
+        - AlienClaimed
+      abis:
+        - name: StakingPool
+          file: ./abis/StakingPool.json
+      eventHandlers:
+        - event: TokenStaked(indexed address,indexed uint256,indexed bool,uint256)
+          handler: handleTokenStaked
+        - event: MarineClaimed(indexed uint256,indexed bool,uint256)
+          handler: handleMarineClaimed
+        - event: AlienClaimed(indexed uint256,indexed bool,uint256)
+          handler: handleAlienClaimed
+      file: ./src/stakingpool-mapping.ts
