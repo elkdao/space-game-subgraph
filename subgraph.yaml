@@ -25,14 +25,14 @@ dataSources:
         - name: MnA
           file: ./abis/MnA.json
       eventHandlers:
-        - event: AlienBurned(indexed uint256)
-          handler: handleAlienBurned
         - event: AlienMinted(indexed uint256)
           handler: handleAlienMinted
-        - event: MarineBurned(indexed uint256)
-          handler: handleMarineBurned
+        - event: AlienStolen(indexed uint256)
+          handler: handleAlienStolen
         - event: MarineMinted(indexed uint256)
           handler: handleMarineMinted
+        - event: MarineStolen(indexed uint256)
+          handler: handleMarineStolen
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
       file: ./src/mna-mapping.ts
@@ -71,17 +71,17 @@ dataSources:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - TokenStaked
-        - MarineClaimed
         - AlienClaimed
+        - MarineClaimed
+        - TokenStaked
       abis:
         - name: StakingPool
           file: ./abis/StakingPool.json
       eventHandlers:
-        - event: TokenStaked(indexed address,indexed uint256,indexed bool,uint256)
-          handler: handleTokenStaked
-        - event: MarineClaimed(indexed uint256,indexed bool,uint256)
-          handler: handleMarineClaimed
         - event: AlienClaimed(indexed uint256,indexed bool,uint256)
           handler: handleAlienClaimed
+        - event: MarineClaimed(indexed uint256,indexed bool,uint256)
+          handler: handleMarineClaimed
+        - event: TokenStaked(indexed address,indexed uint256,indexed bool,uint256)
+          handler: handleTokenStaked
       file: ./src/stakingpool-mapping.ts

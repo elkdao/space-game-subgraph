@@ -14,3 +14,6 @@ export const NAME_MARINE = 'Marine';
 
 export const STAKING_POOL_CONTRACTS = new Set<string>();
 STAKING_POOL_CONTRACTS.add('0xf042a49fb03cb9d98cba9def8711cee85dc72281');
+
+// TODO: replace with real contract address;
+export const MNA_CONTRACT = ADDRESS_ZERO;

@@ -20,36 +20,23 @@ import {
   STAKING_POOL_CONTRACTS,
   ZERO_BI,
 } from './util/constants'
-
-function loadGame(): Game {
-  let game = Game.load(GAME_ID);
-  if (game == null) {
-    game = new Game(GAME_ID);
-    game.aliensMinted = ZERO_BI;
-    game.aliensStaked = ZERO_BI;
-    game.aliensStolen = ZERO_BI;
-    game.marinesMinted = ZERO_BI;
-    game.marinesStaked = ZERO_BI;
-    game.marinesStolen = ZERO_BI;
-  }
-
-  return game;
-}
-
-function tokenIdErc721(contract: string, tokenId: string): string {
-  return `${contract}-${tokenId}`;
-}
+import { loadGame, tokenIdErc721 } from './util/helpers';
 
 function initPlayer(id: string): Player {
   const player = new Player(id);
   player.aliensLost = ZERO_BI;
   player.aliensOwned = ZERO_BI;
+  player.aliensMinted = ZERO_BI;
+  player.aliensStaked = ZERO_BI;
   player.aliensStolen = ZERO_BI;
-  player.mints = ZERO_BI;
   player.tokensOwned = ZERO_BI;
   player.marinesLost = ZERO_BI;
   player.marinesOwned = ZERO_BI;
+  player.marinesMinted = ZERO_BI;
+  player.marinesStaked = ZERO_BI;
   player.marinesStolen = ZERO_BI;
+  player.oresClaimed = ZERO_BI;
+  player.mints = ZERO_BI;
 
   return player;
 }
@@ -65,21 +52,6 @@ function initToken(id: string, tokenId: BigInt, name: string, owner: string, tx:
 
   return token;
 };
-
-function initStolenToken(id: string, tokenId: BigInt, name: string, thief: string, victim: string, tx: string): StolenToken {
-  const token = new StolenToken(id);
-  token.tokenId = tokenId;
-  token.name = name;
-  token.thief = thief;
-  token.victim = victim;
-  token.mintTx = tx;
-
-  return token;
-}
-
-function isTokenStaked(newOwner: string): boolean {
-  return STAKING_POOL_CONTRACTS.has(newOwner.toLowerCase());
-}
 
 function incrementTokensOwned(player: Player, token: Token): void {
   player.tokensOwned = player.tokensOwned.plus(ONE_BI);
@@ -111,6 +83,12 @@ function handleTokenMinted(
   let caller = Player.load(callerAddress);
   if (caller == null) {
     caller = initPlayer(callerAddress);
+  }
+
+  if (name === NAME_ALIEN) {
+    caller.aliensMinted = caller.aliensMinted.plus(ONE_BI);
+  } else {
+    caller.marinesMinted = caller.marinesMinted.plus(ONE_BI);
   }
 
   caller.mints = caller.mints.plus(ONE_BI);
@@ -151,144 +129,67 @@ export function handleMarineMinted(event: MarineMinted): void {
   game.save();
 }
 
-function handleTokenStake(event: Transfer, token: Token): void {
-  token.isStaked = true;
-  token.save();
+function initStolenToken(
+  id: string,
+  tokenId: BigInt,
+  victim: string,
+  mintTx: string,
+  isMarine: boolean,
+): StolenToken {
+  const stolenToken = new StolenToken(id);
+  stolenToken.tokenId = tokenId;
+  stolenToken.thief = ''; // unknown at this point
+  stolenToken.victim = victim;
+  stolenToken.mintTx = mintTx;
+  stolenToken.name = isMarine ? NAME_MARINE : NAME_ALIEN;
 
-  const game = loadGame();
-  if (token.name == NAME_MARINE) {
-    game.marinesStaked = game.marinesStaked.plus(ONE_BI);
-  } else {
-    game.aliensStaked = game.aliensStaked.plus(ONE_BI);
-  }
-
-  game.save();
+  return stolenToken;
 }
 
-function handleTokenUnstake(event: Transfer, token: Token): void {
-  token.isStaked = false;
-  token.save();
-
-  const game = loadGame();
-  if (token.name == NAME_MARINE) {
-    game.marinesStaked = game.marinesStaked.minus(ONE_BI);
-  } else {
-    game.aliensStaked = game.aliensStaked.minus(ONE_BI);
-  }
-
-  game.save();
-}
-
-function handleMintStake(event: Transfer, token: Token): void {
+function handleAlienStolen(event: AlienStolen): void {
   const callerAddress = event.transaction.from.toHexString();
   let caller = Player.load(callerAddress);
   if (caller == null) {
     caller = initPlayer(callerAddress);
   }
-
-  incrementTokensOwned(caller, token);
+  caller.aliensLost = caller.aliensLost.plus(ONE_BI);
   caller.save();
 
-  token.owner = caller.id;
-  token.isStaked = true;
-  token.save();
-
   const game = loadGame();
-  if (token.name == NAME_MARINE) {
-    game.marinesStaked = game.marinesStaked.plus(ONE_BI);
-  } else {
-    game.aliensStaked = game.aliensStaked.plus(ONE_BI);
-  }
-
+  game.aliensStolen = game.aliensStolen.plus(ONE_BI);
   game.save();
-}
 
-function handleMintStolen(event: Transfer, token: Token): void {
-  const callerAddress = event.transaction.from.toHexString();
-  let caller = Player.load(callerAddress);
-  if (caller == null) {
-    caller = initPlayer(callerAddress);
-  }
 
-  const to = event.params.to.toHexString();
-  let thief = Player.load(to);
-  if (thief == null) {
-    thief = initPlayer(to);
-  }
-
-  const game = loadGame();
-  if (token.name == NAME_MARINE) {
-    caller.marinesLost = caller.marinesLost.plus(ONE_BI);
-    thief.marinesStolen = thief.marinesStolen.plus(ONE_BI);
-    game.marinesStolen = game.marinesStolen.plus(ONE_BI);
-  } else {
-    caller.aliensLost = caller.aliensLost.plus(ONE_BI);
-    thief.aliensStolen = thief.aliensStolen.plus(ONE_BI);
-    game.aliensStolen = game.aliensStolen.plus(ONE_BI);
-  }
-
-  game.save();
-  caller.save();
-
-  incrementTokensOwned(thief, token);
-  thief.save();
-
-  token.owner = thief.id;
-  token.save();
-
-  const tx = event.transaction.hash.toHexString();
-  const stolenToken = initStolenToken(token.id, token.tokenId, token.name, thief.id, caller.id, tx);
+  const contractAddress = event.address.toHexString();
+  const tokenId = event.params.tokenId;
+  const compositeTokenId = tokenIdErc721(contractAddress, tokenId.toString());
+  const stolenToken = initStolenToken(compositeTokenId, tokenId, callerAddress, event.transaction.hash.toString(), false);
   stolenToken.save();
 }
 
-function handleMint(event: Transfer, token: Token): void {
-  const to = event.params.to.toHexString();
-  let minter = Player.load(to);
-  if (minter == null) {
-    minter = initPlayer(to);
+function handleMarineStolen(event: MarineStolen): void {
+  const callerAddress = event.transaction.from.toHexString();
+  let caller = Player.load(callerAddress);
+  if (caller == null) {
+    caller = initPlayer(callerAddress);
   }
+  caller.marinesLost = caller.marinesLost.plus(ONE_BI);
+  caller.save();
 
-  incrementTokensOwned(minter, token);
-  minter.save();
+  const game = loadGame();
+  game.marinesStolen = game.marinesStolen.plus(ONE_BI);
+  game.save();
 
-  token.owner = minter.id;
-  token.save();
+
+  const contractAddress = event.address.toHexString();
+  const tokenId = event.params.tokenId;
+  const compositeTokenId = tokenIdErc721(contractAddress, tokenId.toString());
+  const stolenToken = initStolenToken(compositeTokenId, tokenId, callerAddress, event.transaction.hash.toString(), true);
+  stolenToken.save();
 }
 
-function handlePlayerTransfer(event: Transfer, token: Token): void {
-  const from = event.params.from.toHexString();
-  let prevOwner = Player.load(from);
-  if (prevOwner == null) {
-    // this should never happen
-    prevOwner = initPlayer(from);
-    prevOwner.tokensOwned = prevOwner.tokensOwned.plus(ONE_BI);
-  }
-
-  const to = event.params.to.toHexString();
-  let newOwner = Player.load(to);
-  if (newOwner == null) {
-    newOwner = initPlayer(to);
-  }
-
-  decrementTokensOwned(prevOwner, token);
-  prevOwner.save();
-
-  incrementTokensOwned(newOwner, token);
-  newOwner.save();
-
-  token.owner = newOwner.id;
-  token.save();
-}
-
-// Transfer is emitted anytime a token is sent to a different address
-// We need to handle the following cases:
-// 1. Stake
-// 2. Unstake
-// 3. Mint & Stake
-// 4. Mint & Stolen
-// 5. Mint to Caller
-// 6. Player to Player Transfer
 export function handleTransfer(event: Transfer): void {
+  const callerAddress = event.transaction.from.toHexString();
   const contractAddress = event.address.toHexString();
   const tokenId = event.params.tokenId.toString();
   const compositeTokenId = tokenIdErc721(contractAddress, tokenId);
@@ -298,65 +199,50 @@ export function handleTransfer(event: Transfer): void {
     throw new Error(`Token (${compositeTokenId}) should have been created in mint event`)
   }
 
-  const callerAddress = event.transaction.from.toHexString();
   const to = event.params.to.toHexString();
+  if (token.owner == to) {
+    // Token is being unstaked from the StakingPool, noop
+    return;
+  }
+
+  let newOwner = Player.load(to);
+  if (newOwner == null) {
+    newOwner = initPlayer(to);
+  }
+
   const from = event.params.from.toHexString();
   const isNewMint = from == ADDRESS_ZERO;
-  const isBeingStaked = isTokenStaked(to);
+  if (!isNewMint) {
+    let prevOwner = Player.load(from);
+    if (prevOwner == null) {
+      // this should never happen
+      prevOwner = initPlayer(from);
+      prevOwner.tokensOwned = prevOwner.tokensOwned.plus(ONE_BI);
+    }
 
-  if (isBeingStaked && !isNewMint) {
-    // 1. Stake
-    handleTokenStake(event, token);
-  } else if (isTokenStaked(from)) {
-    // 2. Unstake
-    handleTokenUnstake(event, token);
-  } else if (isNewMint && isBeingStaked) {
-    // 3. Mint & Stake
-    handleMintStake(event, token);
-  } else if (isNewMint && to != callerAddress) {
-    // 4. Mint & Stolen
-    handleMintStolen(event, token);
-  } else if (isNewMint) {
-    // 5. Mint to Caller
-    handleMint(event, token);
-  } else if (!isNewMint) {
-    // 6. Player to Player Transfer
-    handlePlayerTransfer(event, token);
-  } else {
-    throw new Error('Unhandled case');
-  }
-}
+    decrementTokensOwned(prevOwner, token);
+    prevOwner.save();
+  } else if (to !== callerAddress) {
+    // This token was stolen, update StolenToken.thief now that we know who it is
+    const stolenToken = StolenToken.load(compositeTokenId);
+    if (stolenToken == null) {
+      throw new Error('Token was stolen but not tracked');
+    }
 
-function handleTokenBurned(tokenId: string): void {
-  const token = Token.load(tokenId);
-  if (token == null) {
-    log.warning('Received Burn event for token ({}) but entity does not exist', [tokenId]);
-    return;
+    stolenToken.thief = to;
+    stolenToken.save();
+
+    // increment aliens / marines stolen
+    if (token.name === NAME_MARINE) {
+      newOwner.aliensStolen = newOwner.aliensStolen.plus(ONE_BI);
+    } else {
+      newOwner.marinesStolen = newOwner.marinesStolen.plus(ONE_BI);
+    }
   }
 
-  const owner = Player.load(token.owner);
-  if (owner == null) {
-    log.warning('Received Burn event for token ({}) but could not load owner ({})', [tokenId, token.owner]);
-    return;
-  }
+  incrementTokensOwned(newOwner, token);
+  newOwner.save();
 
-  decrementTokensOwned(owner, token);
-  owner.save();
-
-  token.owner = ADDRESS_ZERO;
+  token.owner = newOwner.id;
   token.save();
-}
-
-export function handleAlienBurned(event: AlienBurned): void {
-  const contractAddress = event.address.toHexString();
-  const tokenId = event.params.tokenId.toString();
-  const compositeTokenId = tokenIdErc721(contractAddress, tokenId);
-  handleTokenBurned(compositeTokenId);
-}
-
-export function handleMarineBurned(event: MarineBurned): void {
-  const contractAddress = event.address.toHexString();
-  const tokenId = event.params.tokenId.toString();
-  const compositeTokenId = tokenIdErc721(contractAddress, tokenId);
-  handleTokenBurned(compositeTokenId);
 }

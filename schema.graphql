@@ -11,16 +11,21 @@ type Game @entity {
 type Player @entity {
   id: ID!
   aliensLost: BigInt!
+  aliensMinted: BigInt!
   aliensOwned: BigInt!
+  aliensStaked: BigInt!
   aliensStolen: BigInt!
-  mints: BigInt!
   marinesLost: BigInt!
   marinesOwned: BigInt!
+  marinesMinted: BigInt!
+  marinesStaked: BigInt!
   marinesStolen: BigInt!
+  mints: BigInt!
   tokensOwned: BigInt!
   tokens: [Token!]! @derivedFrom(field: "owner")
   tokensLost: [StolenToken!]! @derivedFrom(field: "victim")
   tokensStolen: [StolenToken!]! @derivedFrom(field: "thief")
+  oresClaimed: BigInt!
 }
 
 type Token @entity {
