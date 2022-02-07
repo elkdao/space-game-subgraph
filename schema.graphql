@@ -6,6 +6,8 @@ type Game @entity {
   marinesMinted: BigInt!
   marinesStaked: BigInt!
   marinesStolen: BigInt!
+  mintsCommitted: BigInt!
+  mintsRevealed: BigInt!
 }
 
 type Player @entity {

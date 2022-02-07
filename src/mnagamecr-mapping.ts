@@ -1,9 +1,18 @@
-import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 import {
-  AlienClaimed,
-  MarineClaimed,
-  TokenStaked,
-} from '../generated/StakingPool'
+  MintCommitted,
+  MintRevealed,
+} from '../generated/MnAGameCR/MnAGameCR'
+import { Game } from '../generated/schema'
+import { loadGame } from './util/helpers';
 
-import { Game, Player, Token, StolenToken } from '../generated/schema'
+export function handleMintCommitted(event: MintCommitted): void {
+  const game = loadGame();
+  game.mintsCommitted = game.mintsCommitted.plus(event.params.amount);
+  game.save();
+}
 
+export function handleMintRevealed(event: MintRevealed): void {
+  const game = loadGame();
+  game.mintsRevealed = game.mintsRevealed .plus(event.params.amount);
+  game.save();
+}
