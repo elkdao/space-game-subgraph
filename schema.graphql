@@ -3,6 +3,7 @@ type Game @entity {
   aliensMinted: BigInt!
   aliensStaked: BigInt!
   aliensStolen: BigInt!
+  founderPassMinted: BigInt!
   marinesMinted: BigInt!
   marinesStaked: BigInt!
   marinesStolen: BigInt!
@@ -17,6 +18,8 @@ type Player @entity {
   aliensOwned: BigInt!
   aliensStaked: BigInt!
   aliensStolen: BigInt!
+  founderPassOwned: BigInt!
+  founderPassMinted: BigInt!
   marinesLost: BigInt!
   marinesOwned: BigInt!
   marinesMinted: BigInt!

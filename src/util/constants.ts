@@ -8,9 +8,10 @@ export const ZERO_BD = BigDecimal.fromString('0')
 export const ONE_BD = BigDecimal.fromString('1')
 
 // Game constants
-export const GAME_ID = 'MnA';
-export const NAME_ALIEN = 'Alien';
-export const NAME_MARINE = 'Marine';
+export const GAME_ID = 'SpaceGame'
+export const NAME_ALIEN = 'Alien'
+export const NAME_PASS = 'Founder Pass'
+export const NAME_MARINE = 'Marine'
 
 // TODO: replace with real contract address;
-export const MNA_CONTRACT = ADDRESS_ZERO;
+export const MNA_CONTRACT = ADDRESS_ZERO

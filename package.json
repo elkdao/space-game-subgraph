@@ -7,7 +7,8 @@
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ elkdao/spacegame",
     "create-local": "graph create --node http://localhost:8020/ elkdao/spacegame",
     "remove-local": "graph remove --node http://localhost:8020/ elkdao/spacegame",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 elkdao/spacegame"
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 elkdao/spacegame",
+    "deploy-hosted": "graph deploy --product hosted-service elkdao/Spacegame"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.25.1",
