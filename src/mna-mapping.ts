@@ -90,7 +90,7 @@ function handleTokenMinted(
   if (caller == null) {
     caller = initPlayer(callerAddress)
     const game = loadGame()
-    game.players = game.players.plus(ONE_BI)
+    game.numPlayers = game.numPlayers.plus(ONE_BI)
   }
 
   if (typ === NAME_ALIEN) {
@@ -154,29 +154,21 @@ export function handleMarineMinted(event: MarineMinted): void {
     const c = new Contract(contractAddress.toHexString())
     c.save()
   }
-  // const callerAddress = event.transaction.from.toHexString()
-  // const contractAddress = event.address
-  //
-  // const contract = Contract.load(contractAddress.toHexString())
-  // if (contract == null) {
-  //   const c = new Contract(contractAddress.toHexString())
-  //   c.save()
-  // }
-  //
-  // const tokenId = event.params.tokenId
-  // handleTokenMinted(
-  //   event.block.number,
-  //   event.transaction.hash.toHexString(),
-  //   event.block.timestamp,
-  //   callerAddress,
-  //   contractAddress,
-  //   tokenId,
-  //   NAME_MARINE
-  // )
-  //
-  // const game = loadGame()
-  // game.marinesMinted = game.marinesMinted.plus(ONE_BI)
-  // game.save()
+
+  const tokenId = event.params.tokenId
+  handleTokenMinted(
+    event.block.number,
+    event.transaction.hash.toHexString(),
+    event.block.timestamp,
+    callerAddress,
+    contractAddress,
+    tokenId,
+    NAME_MARINE
+  )
+
+  const game = loadGame()
+  game.marinesMinted = game.marinesMinted.plus(ONE_BI)
+  game.save()
 }
 
 export function handleTransfer(event: Transfer): void {
@@ -200,7 +192,7 @@ export function handleTransfer(event: Transfer): void {
   if (newOwner == null) {
     newOwner = initPlayer(to)
     const game = loadGame()
-    game.players = game.players.plus(ONE_BI)
+    game.numPlayers = game.numPlayers.plus(ONE_BI)
   }
 
   const from = event.params.from.toHexString()
