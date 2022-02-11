@@ -13,7 +13,8 @@
     "deploy-local2": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 elkdao/Spacegamev2",
     "deploy-find": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 elkdao/find",
     "deploy-hosted": "graph deploy --product hosted-service elkdao/Spacegame",
-    "deploy-hosted2": "graph deploy --product hosted-service elkdao/Spacegamev2"
+    "deploy-hosted2": "graph deploy --product hosted-service elkdao/Spacegamev2",
+    "deploy-hosted3": "graph deploy --product hosted-service elkdao/sgfinder"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.25.1",
