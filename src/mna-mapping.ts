@@ -90,7 +90,7 @@ function handleTokenMinted(
   if (caller == null) {
     caller = initPlayer(callerAddress)
     const game = loadGame()
-    game.players = game.players.plus(ONE_BI)
+    game.numPlayers = game.numPlayers.plus(ONE_BI)
     game.save()
   }
 
@@ -194,7 +194,7 @@ export function handleTransfer(event: Transfer): void {
   if (newOwner == null) {
     newOwner = initPlayer(to)
     const game = loadGame()
-    game.players = game.players.plus(ONE_BI)
+    game.numPlayers = game.numPlayers.plus(ONE_BI)
     game.save()
   }
 

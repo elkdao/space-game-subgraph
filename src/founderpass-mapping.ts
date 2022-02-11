@@ -38,6 +38,7 @@ export function handleTransfer(event: Transfer): void {
   const tokenId = event.params.tokenId.toString()
   const compositeTokenId = tokenIdErc721(contractAddress, tokenId)
 
+  const game = loadGame()
   let token = Token.load(compositeTokenId)
   if (token == null) {
     token = initToken(event)
@@ -47,14 +48,13 @@ export function handleTransfer(event: Transfer): void {
   let newOwner = Player.load(to)
   if (newOwner == null) {
     newOwner = initPlayer(to)
+    game.numPlayers = game.numPlayers.plus(ONE_BI)
   }
 
   const from = event.params.from.toHexString()
   const isNewMint = from == ADDRESS_ZERO
   if (isNewMint) {
-    const game = loadGame()
     game.founderPassMinted = game.founderPassMinted.plus(ONE_BI)
-    game.save()
     newOwner.founderPassMinted = newOwner.founderPassMinted.plus(ONE_BI)
   } else {
     let prevOwner = Player.load(from)
@@ -62,6 +62,7 @@ export function handleTransfer(event: Transfer): void {
       // this should never happen
       prevOwner = initPlayer(from)
       incrementTokensOwned(prevOwner)
+      game.numPlayers = game.numPlayers.plus(ONE_BI)
     }
 
     decrementTokensOwned(prevOwner)
@@ -73,4 +74,5 @@ export function handleTransfer(event: Transfer): void {
 
   token.owner = newOwner.id
   token.save()
+  game.save()
 }

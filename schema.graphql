@@ -10,7 +10,7 @@ type Game @entity {
   mintsCommitted: BigInt!
   mintsRevealed: BigInt!
   oresClaimed: BigInt!
-  players: BigInt!
+  numPlayers: BigInt!
 }
 
 type Player @entity {
