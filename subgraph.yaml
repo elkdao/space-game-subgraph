@@ -47,12 +47,8 @@ dataSources:
   #     eventHandlers:
   #       - event: AlienMinted(indexed uint256)
   #         handler: handleAlienMinted
-  #       - event: AlienStolen(indexed uint256)
-  #         handler: handleAlienStolen
   #       - event: MarineMinted(indexed uint256)
   #         handler: handleMarineMinted
-  #       - event: MarineStolen(indexed uint256)
-  #         handler: handleMarineStolen
   #       - event: Transfer(indexed address,indexed address,indexed uint256)
   #         handler: handleTransfer
   #     file: ./src/mna-mapping.ts

@@ -15,7 +15,9 @@ export function initPlayer(id: string): Player {
   player.aliensStolen = ZERO_BI
   player.founderPassOwned = ZERO_BI
   player.founderPassMinted = ZERO_BI
-  player.tokensOwned = ZERO_BI
+  player.numTokensOwned = ZERO_BI
+  player.numTokensLost = ZERO_BI
+  player.numTokensStolen = ZERO_BI
   player.marinesLost = ZERO_BI
   player.marinesOwned = ZERO_BI
   player.marinesMinted = ZERO_BI
@@ -51,7 +53,7 @@ function initToken(
 }
 
 function incrementTokensOwned(player: Player, token: Token): void {
-  player.tokensOwned = player.tokensOwned.plus(ONE_BI)
+  player.numTokensOwned = player.numTokensOwned.plus(ONE_BI)
   if (token.name == NAME_MARINE) {
     player.marinesOwned = player.marinesOwned.plus(ONE_BI)
   } else {
@@ -60,7 +62,7 @@ function incrementTokensOwned(player: Player, token: Token): void {
 }
 
 function decrementTokensOwned(player: Player, token: Token): void {
-  player.tokensOwned = player.tokensOwned.minus(ONE_BI)
+  player.numTokensOwned = player.numTokensOwned.minus(ONE_BI)
   if (token.name == NAME_MARINE) {
     player.marinesOwned = player.marinesOwned.minus(ONE_BI)
   } else {
@@ -138,58 +140,6 @@ export function handleMarineMinted(event: MarineMinted): void {
   game.save()
 }
 
-function handleAlienStolen(event: AlienStolen): void {
-  const callerAddress = event.transaction.from.toHexString()
-  let caller = Player.load(callerAddress)
-  const game = loadGame()
-  if (caller == null) {
-    caller = initPlayer(callerAddress)
-    game.players = game.players.plus(ONE_BI)
-  }
-  caller.aliensLost = caller.aliensLost.plus(ONE_BI)
-  caller.save()
-
-  game.aliensStolen = game.aliensStolen.plus(ONE_BI)
-  game.save()
-
-  const contractAddress = event.address.toHexString()
-  const tokenId = event.params.tokenId
-  const compositeTokenId = tokenIdErc721(contractAddress, tokenId.toString())
-  const token = Token.load(compositeTokenId)
-  if (token == null) {
-    throw new Error('Cannot steal token that does not exist')
-  }
-
-  token.victim = callerAddress
-  token.save()
-}
-
-function handleMarineStolen(event: MarineStolen): void {
-  const callerAddress = event.transaction.from.toHexString()
-  let caller = Player.load(callerAddress)
-  const game = loadGame()
-  if (caller == null) {
-    caller = initPlayer(callerAddress)
-    game.players = game.players.plus(ONE_BI)
-  }
-  caller.marinesLost = caller.marinesLost.plus(ONE_BI)
-  caller.save()
-
-  game.marinesStolen = game.marinesStolen.plus(ONE_BI)
-  game.save()
-
-  const contractAddress = event.address.toHexString()
-  const tokenId = event.params.tokenId
-  const compositeTokenId = tokenIdErc721(contractAddress, tokenId.toString())
-  const token = Token.load(compositeTokenId)
-  if (token == null) {
-    throw new Error('Cannot steal token that does not exist')
-  }
-
-  token.victim = callerAddress
-  token.save()
-}
-
 export function handleTransfer(event: Transfer): void {
   const callerAddress = event.transaction.from.toHexString()
   const contractAddress = event.address.toHexString()
@@ -215,13 +165,13 @@ export function handleTransfer(event: Transfer): void {
   }
 
   const from = event.params.from.toHexString()
+  let prevOwner = Player.load(from)
   const isNewMint = from == ADDRESS_ZERO
   if (!isNewMint) {
-    let prevOwner = Player.load(from)
     if (prevOwner == null) {
       // this should never happen
       prevOwner = initPlayer(from)
-      prevOwner.tokensOwned = prevOwner.tokensOwned.plus(ONE_BI)
+      prevOwner.numTokensOwned = prevOwner.numTokensOwned.plus(ONE_BI)
     }
 
     decrementTokensOwned(prevOwner, token)
@@ -236,6 +186,9 @@ export function handleTransfer(event: Transfer): void {
     } else {
       newOwner.marinesStolen = newOwner.marinesStolen.plus(ONE_BI)
     }
+
+    newOwner.numTokensStolen = newOwner.numTokensStolen.plus(ONE_BI)
+    prevOwner.numTokensLost = prevOwner.numTokensLost.plus(ONE_BI)
   }
 
   incrementTokensOwned(newOwner, token)

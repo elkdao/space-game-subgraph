@@ -28,7 +28,9 @@ type Player @entity {
   marinesStaked: BigInt!
   marinesStolen: BigInt!
   mints: BigInt!
-  tokensOwned: BigInt!
+  numTokensOwned: BigInt!
+  numTokensLost: BigInt!
+  numTokensStolen: BigInt!
   tokens: [Token!]! @derivedFrom(field: "owner")
   tokensLost: [Token!]! @derivedFrom(field: "victim")
   tokensStolen: [Token!]! @derivedFrom(field: "thief")
