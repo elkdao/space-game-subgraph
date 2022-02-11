@@ -30,10 +30,15 @@ export function handleTokenStaked(event: TokenStaked): void {
   const game = loadGame()
   if (isMarine) {
     game.marinesStaked = game.marinesStaked.plus(ONE_BI)
+    player.marinesStaked = player.marinesStaked.plus(ONE_BI)
   } else {
     game.aliensStaked = game.aliensStaked.plus(ONE_BI)
+    player.aliensStaked = player.aliensStaked.plus(ONE_BI)
   }
 
+  player.numTokensStaked = player.numTokensStaked.plus(ONE_BI)
+
+  player.save()
   game.save()
 }
 
@@ -49,21 +54,25 @@ function handleClaim(isMarine: boolean, tokenId: string, isUnstaked: boolean, or
     throw new Error('Cannot claim if owner does not exist')
   }
 
+  const game = loadGame()
   if (isUnstaked) {
     token.isStaked = false
     token.stakedAt = ZERO_BI
     token.save()
 
-    const game = loadGame()
     if (isMarine) {
       game.marinesStaked = game.marinesStaked.minus(ONE_BI)
+      player.marinesStaked = player.marinesStaked.minus(ONE_BI)
     } else {
       game.aliensStaked = game.aliensStaked.minus(ONE_BI)
+      player.aliensStaked = player.aliensStaked.minus(ONE_BI)
     }
 
-    game.oresClaimed = game.oresClaimed.plus(oresClaimed)
-    game.save()
+    player.numTokensStaked = player.numTokensStaked.minus(ONE_BI)
   }
+
+  game.oresClaimed = game.oresClaimed.plus(oresClaimed)
+  game.save()
 
   player.oresClaimed = player.oresClaimed.plus(oresClaimed)
   player.save()

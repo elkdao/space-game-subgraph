@@ -17,6 +17,7 @@ export function initPlayer(id: string): Player {
   player.founderPassMinted = ZERO_BI
   player.numTokensOwned = ZERO_BI
   player.numTokensLost = ZERO_BI
+  player.numTokensStaked = ZERO_BI
   player.numTokensStolen = ZERO_BI
   player.marinesLost = ZERO_BI
   player.marinesOwned = ZERO_BI
