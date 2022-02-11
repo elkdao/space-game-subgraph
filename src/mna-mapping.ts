@@ -27,7 +27,15 @@ export function initPlayer(id: string): Player {
   return player
 }
 
-function initToken(id: string, tokenId: BigInt, name: string, owner: string, tx: string, mintedAt: BigInt): Token {
+function initToken(
+  id: string,
+  tokenId: BigInt,
+  name: string,
+  owner: string,
+  tx: string,
+  mintedAt: BigInt,
+  block: BigInt
+): Token {
   const token = new Token(id)
   token.name = name
   token.tokenId = tokenId
@@ -35,6 +43,7 @@ function initToken(id: string, tokenId: BigInt, name: string, owner: string, tx:
   token.owner = owner
   token.isStaked = false
   token.stakedAt = ZERO_BI
+  token.mintBlock = block
   token.mintTx = tx
   token.mintedAt = mintedAt
 
@@ -60,6 +69,7 @@ function decrementTokensOwned(player: Player, token: Token): void {
 }
 
 function handleTokenMinted(
+  block: BigInt,
   tx: string,
   timestamp: BigInt,
   callerAddress: string,
@@ -72,6 +82,8 @@ function handleTokenMinted(
   let caller = Player.load(callerAddress)
   if (caller == null) {
     caller = initPlayer(callerAddress)
+    const game = loadGame()
+    game.players = game.players.plus(ONE_BI)
   }
 
   if (name === NAME_ALIEN) {
@@ -83,7 +95,7 @@ function handleTokenMinted(
   caller.mints = caller.mints.plus(ONE_BI)
   caller.save()
 
-  const token = initToken(compositeTokenId, tokenId, name, caller.id, tx, timestamp)
+  const token = initToken(compositeTokenId, tokenId, name, caller.id, tx, timestamp, block)
 
   token.save()
 }
@@ -93,6 +105,7 @@ export function handleAlienMinted(event: AlienMinted): void {
   const contractAddress = event.address.toHexString()
   const tokenId = event.params.tokenId
   handleTokenMinted(
+    event.block.number,
     event.transaction.hash.toString(),
     event.block.timestamp,
     callerAddress,
@@ -111,6 +124,7 @@ export function handleMarineMinted(event: MarineMinted): void {
   const contractAddress = event.address.toHexString()
   const tokenId = event.params.tokenId
   handleTokenMinted(
+    event.block.number,
     event.transaction.hash.toString(),
     event.block.timestamp,
     callerAddress,
@@ -127,13 +141,14 @@ export function handleMarineMinted(event: MarineMinted): void {
 function handleAlienStolen(event: AlienStolen): void {
   const callerAddress = event.transaction.from.toHexString()
   let caller = Player.load(callerAddress)
+  const game = loadGame()
   if (caller == null) {
     caller = initPlayer(callerAddress)
+    game.players = game.players.plus(ONE_BI)
   }
   caller.aliensLost = caller.aliensLost.plus(ONE_BI)
   caller.save()
 
-  const game = loadGame()
   game.aliensStolen = game.aliensStolen.plus(ONE_BI)
   game.save()
 
@@ -152,13 +167,14 @@ function handleAlienStolen(event: AlienStolen): void {
 function handleMarineStolen(event: MarineStolen): void {
   const callerAddress = event.transaction.from.toHexString()
   let caller = Player.load(callerAddress)
+  const game = loadGame()
   if (caller == null) {
     caller = initPlayer(callerAddress)
+    game.players = game.players.plus(ONE_BI)
   }
   caller.marinesLost = caller.marinesLost.plus(ONE_BI)
   caller.save()
 
-  const game = loadGame()
   game.marinesStolen = game.marinesStolen.plus(ONE_BI)
   game.save()
 
@@ -194,6 +210,8 @@ export function handleTransfer(event: Transfer): void {
   let newOwner = Player.load(to)
   if (newOwner == null) {
     newOwner = initPlayer(to)
+    const game = loadGame()
+    game.players = game.players.plus(ONE_BI)
   }
 
   const from = event.params.from.toHexString()

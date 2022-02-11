@@ -11,7 +11,7 @@ dataSources:
       startBlock: 24701870
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Transfer
@@ -31,7 +31,7 @@ dataSources:
   #     # startBlock: 13717992
   #   mapping:
   #     kind: ethereum/events
-  #     apiVersion: 0.0.5
+  #     apiVersion: 0.0.6
   #     language: wasm/assemblyscript
   #     entities:
   #       - AlienBurned
@@ -65,7 +65,7 @@ dataSources:
   #     # startBlock: 13717992
   #   mapping:
   #     kind: ethereum/events
-  #     apiVersion: 0.0.5
+  #     apiVersion: 0.0.6
   #     language: wasm/assemblyscript
   #     entities:
   #       - MintCommitted
@@ -88,7 +88,7 @@ dataSources:
   #     # startBlock: 13717992
   #   mapping:
   #     kind: ethereum/events
-  #     apiVersion: 0.0.5
+  #     apiVersion: 0.0.6
   #     language: wasm/assemblyscript
   #     entities:
   #       - AlienClaimed

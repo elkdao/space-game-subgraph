@@ -9,6 +9,8 @@ type Game @entity {
   marinesStolen: BigInt!
   mintsCommitted: BigInt!
   mintsRevealed: BigInt!
+  oresClaimed: BigInt!
+  players: BigInt!
 }
 
 type Player @entity {
@@ -38,6 +40,7 @@ type Token @entity {
   name: String!
   tokenId: BigInt!
   balance: BigInt!
+  mintBlock: BigInt!
   mintTx: String!
   mintedAt: BigInt!
   owner: Player!

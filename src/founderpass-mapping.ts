@@ -45,29 +45,9 @@ export function handleTransfer(event: Transfer): void {
   let newOwner = Player.load(to)
   if (newOwner == null) {
     newOwner = initPlayer(to)
-  }
-
-  const from = event.params.from.toHexString()
-  const isNewMint = from == ADDRESS_ZERO
-  if (isNewMint) {
     const game = loadGame()
-    game.founderPassMinted = game.founderPassMinted.plus(ONE_BI)
-    game.save()
-    newOwner.founderPassMinted = newOwner.founderPassMinted.plus(ONE_BI)
-  } else {
-    let prevOwner = Player.load(from)
-    if (prevOwner == null) {
-      // this should never happen
-      prevOwner = initPlayer(from)
-      prevOwner.tokensOwned = prevOwner.tokensOwned.plus(ONE_BI)
-    }
-
-    decrementTokensOwned(prevOwner)
-    prevOwner.save()
+    game.players = game.players.plus(ONE_BI)
   }
-
-  incrementTokensOwned(newOwner)
-  newOwner.save()
 
   token.owner = newOwner.id
   token.save()

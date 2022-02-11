@@ -16,6 +16,8 @@ export function loadGame(): Game {
     game.marinesMinted = ZERO_BI
     game.marinesStaked = ZERO_BI
     game.marinesStolen = ZERO_BI
+    game.oresClaimed = ZERO_BI
+    game.players = ZERO_BI
   }
 
   return game
