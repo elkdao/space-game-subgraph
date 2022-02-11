@@ -29,7 +29,6 @@ dataSources:
     name: MnA
     network: matic
     source:
-      address: "0xa6e3d49f2788c5e130664130e852c9dc895abf3b" # test
       abi: MnA
         #startBlock: 24809267 # last mint
       startBlock: 24828300
