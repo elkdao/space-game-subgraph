@@ -7,11 +7,14 @@
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ elkdao/spacegame",
     "create-local": "graph create --node http://localhost:8020/ elkdao/spacegame",
     "create-local2": "graph create --node http://localhost:8020/ elkdao/Spacegamev2",
+    "create-find": "graph create --node http://localhost:8020/ elkdao/find",
     "remove-local": "graph remove --node http://localhost:8020/ elkdao/spacegame",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 elkdao/spacegame",
     "deploy-local2": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 elkdao/Spacegamev2",
+    "deploy-find": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 elkdao/find",
     "deploy-hosted": "graph deploy --product hosted-service elkdao/Spacegame",
-    "deploy-hosted2": "graph deploy --product hosted-service elkdao/Spacegamev2"
+    "deploy-hosted2": "graph deploy --product hosted-service elkdao/Spacegamev2",
+    "deploy-find": "graph deploy --product hosted-service elkdao/find"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.25.1",
