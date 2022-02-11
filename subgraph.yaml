@@ -1,4 +1,7 @@
 specVersion: 0.0.2
+# graft:
+#   base: QmZq1SX5Zt36BQojSGxD5xnM1m7YiWCGhtVsgqLUUukk8P
+#   block: 24801340
 schema:
   file: ./schema.graphql
 dataSources:
@@ -26,9 +29,10 @@ dataSources:
   #   name: MnA
   #   network: matic
   #   source:
-  #     address: "0xf042a49fb03cb9d98cba9def8711cee85dc72281" # placeholder
+  #     address: "0xa6e3d49f2788c5e130664130e852c9dc895abf3b" # test
   #     abi: MnA
-  #     # startBlock: 13717992
+  #       #startBlock: 24809267 # last mint
+  #     startBlock: 24796198	
   #   mapping:
   #     kind: ethereum/events
   #     apiVersion: 0.0.6

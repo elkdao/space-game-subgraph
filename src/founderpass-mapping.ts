@@ -19,9 +19,11 @@ function initToken(event: Transfer): Token {
   const compositeTokenId = tokenIdErc721(contractAddress, tokenId)
 
   const t = new Token(compositeTokenId)
-  t.name = NAME_PASS
+  t.contract = contractAddress
+  t.typ = NAME_PASS
   t.tokenId = event.params.tokenId
   t.balance = ONE_BI
+  t.mintBlock = event.block.number
   t.mintTx = event.transaction.hash.toHexString()
   t.mintedAt = event.block.timestamp
   t.owner = event.params.to.toHexString()
@@ -45,9 +47,29 @@ export function handleTransfer(event: Transfer): void {
   let newOwner = Player.load(to)
   if (newOwner == null) {
     newOwner = initPlayer(to)
-    const game = loadGame()
-    game.players = game.players.plus(ONE_BI)
   }
+
+  const from = event.params.from.toHexString()
+  const isNewMint = from == ADDRESS_ZERO
+  if (isNewMint) {
+    const game = loadGame()
+    game.founderPassMinted = game.founderPassMinted.plus(ONE_BI)
+    game.save()
+    newOwner.founderPassMinted = newOwner.founderPassMinted.plus(ONE_BI)
+  } else {
+    let prevOwner = Player.load(from)
+    if (prevOwner == null) {
+      // this should never happen
+      prevOwner = initPlayer(from)
+      incrementTokensOwned(prevOwner)
+    }
+
+    decrementTokensOwned(prevOwner)
+    prevOwner.save()
+  }
+
+  incrementTokensOwned(newOwner)
+  newOwner.save()
 
   token.owner = newOwner.id
   token.save()
