@@ -40,7 +40,8 @@ type Player @entity {
 
 type Token @entity {
   id: ID!
-  name: String!
+  contract: Contract!
+  typ: String!
   tokenId: BigInt!
   balance: BigInt!
   mintBlock: BigInt!
@@ -48,7 +49,12 @@ type Token @entity {
   mintedAt: BigInt!
   owner: Player!
   isStaked: Boolean!
-  stakedAt: BigInt
+  stakedAt: BigInt!
   victim: Player
   thief: Player
+  metadata: String
+}
+
+type Contract @entity {
+  id: ID!
 }

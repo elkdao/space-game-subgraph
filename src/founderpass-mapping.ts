@@ -1,7 +1,7 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { Transfer } from '../generated/FounderPass/FounderPass'
 import { Game, Player, Token } from '../generated/schema'
-import { ADDRESS_ZERO, ONE_BI, NAME_PASS } from './util/constants'
+import { ADDRESS_ZERO, ONE_BI, NAME_PASS, ZERO_BI } from './util/constants'
 import { loadGame, tokenIdErc721 } from './util/helpers'
 import { initPlayer } from './mna-mapping'
 
@@ -19,13 +19,16 @@ function initToken(event: Transfer): Token {
   const compositeTokenId = tokenIdErc721(contractAddress, tokenId)
 
   const t = new Token(compositeTokenId)
-  t.name = NAME_PASS
+  t.contract = contractAddress
+  t.typ = NAME_PASS
   t.tokenId = event.params.tokenId
   t.balance = ONE_BI
+  t.mintBlock = event.block.number
   t.mintTx = event.transaction.hash.toHexString()
   t.mintedAt = event.block.timestamp
   t.owner = event.params.to.toHexString()
   t.isStaked = false
+  t.stakedAt = ZERO_BI
 
   return t
 }

@@ -6,15 +6,19 @@
     "build": "graph build",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ elkdao/spacegame",
     "create-local": "graph create --node http://localhost:8020/ elkdao/spacegame",
+    "create-local2": "graph create --node http://localhost:8020/ elkdao/Spacegamev2",
     "remove-local": "graph remove --node http://localhost:8020/ elkdao/spacegame",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 elkdao/spacegame",
-    "deploy-hosted": "graph deploy --product hosted-service elkdao/Spacegame"
+    "deploy-local2": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 elkdao/Spacegamev2",
+    "deploy-hosted": "graph deploy --product hosted-service elkdao/Spacegame",
+    "deploy-hosted2": "graph deploy --product hosted-service elkdao/Spacegamev2"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.25.1",
     "@graphprotocol/graph-ts": "0.24.1",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
+    "as-base64": "^0.2.0",
     "eslint": "^6.2.2",
     "eslint-config-prettier": "^6.1.0",
     "prettier": "^1.18.2",
