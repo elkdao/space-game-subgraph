@@ -94,7 +94,7 @@ function handleTokenMinted(
     game.save()
   }
 
-  if (typ === NAME_ALIEN) {
+  if (typ == NAME_ALIEN) {
     caller.aliensMinted = caller.aliensMinted.plus(ONE_BI)
   } else {
     caller.marinesMinted = caller.marinesMinted.plus(ONE_BI)
@@ -103,15 +103,15 @@ function handleTokenMinted(
   caller.mints = caller.mints.plus(ONE_BI)
   caller.save()
 
-  let metadata = ''
-  const contract = MnA.bind(contractAddress)
-  const result = contract.try_tokenURI(tokenId)
-  if (result.reverted) {
-    log.info('Could not fetch tokenURI for tokenId %s', [tokenId.toString()])
-  } else {
-    const base64 = result.value.slice(29, result.value.length)
-    metadata = base64Decode(base64)
-  }
+  // let metadata = ''
+  // const contract = MnA.bind(contractAddress)
+  // const result = contract.try_tokenURI(tokenId)
+  // if (result.reverted) {
+  //   log.info('Could not fetch tokenURI for tokenId {}', [tokenId.toString()])
+  // } else {
+  //   const base64 = result.value.slice(29, result.value.length)
+  //   metadata = base64Decode(base64)
+  // }
 
   const token = initToken(
     contractAddress.toHexString(),
@@ -122,7 +122,7 @@ function handleTokenMinted(
     tx,
     timestamp,
     block,
-    metadata
+    ''
   )
 
   token.save()
@@ -145,17 +145,19 @@ export function handleAlienMinted(event: AlienMinted): void {
   const game = loadGame()
   game.aliensMinted = game.aliensMinted.plus(ONE_BI)
   game.save()
+
+  const contract = Contract.load(contractAddress.toHexString())
+  if (contract == null) {
+    const c = new Contract(contractAddress.toHexString())
+    const mna = MnA.bind(contractAddress)
+    c.name = mna._name
+    c.save()
+  }
 }
 
 export function handleMarineMinted(event: MarineMinted): void {
   const callerAddress = event.transaction.from.toHexString()
   const contractAddress = event.address
-
-  const contract = Contract.load(contractAddress.toHexString())
-  if (contract == null) {
-    const c = new Contract(contractAddress.toHexString())
-    c.save()
-  }
 
   const tokenId = event.params.tokenId
   handleTokenMinted(
@@ -209,12 +211,12 @@ export function handleTransfer(event: Transfer): void {
     }
 
     decrementTokensOwned(prevOwner, token)
-  } else if (to !== callerAddress && to !== contractAddress) {
+  } else if (to != callerAddress && to != contractAddress) {
     // This token was stolen, update token.thief now that we know who it is
     token.thief = to
 
     // increment aliens / marines stolen
-    if (token.typ === NAME_MARINE) {
+    if (token.typ == NAME_MARINE) {
       newOwner.aliensStolen = newOwner.aliensStolen.plus(ONE_BI)
     } else {
       newOwner.marinesStolen = newOwner.marinesStolen.plus(ONE_BI)

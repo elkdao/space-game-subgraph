@@ -1,38 +1,37 @@
 specVersion: 0.0.2
 # graft:
-#   base: QmZq1SX5Zt36BQojSGxD5xnM1m7YiWCGhtVsgqLUUukk8P
-#   block: 24801340
+#   base: QmRJ93qRbi5dSFHtArFLWwkkxW4ondxq8XZP1yYcrrxdw1
+#   block: 24836209
 schema:
   file: ./schema.graphql
 dataSources:
-  - kind: ethereum
-    name: FounderPass
-    network: matic
-    source:
-      address: "0xf4a57dac3d3a4772347f813c6bf52b6286ac649e"
-      abi: FounderPass
-      startBlock: 24701870
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.6
-      language: wasm/assemblyscript
-      entities:
-        - Transfer
-      abis:
-        - name: FounderPass
-          file: ./abis/FounderPass.json
-      eventHandlers:
-        - event: Transfer(indexed address,indexed address,indexed uint256)
-          handler: handleTransfer
-      file: ./src/founderpass-mapping.ts
+  # - kind: ethereum
+  #   name: FounderPass
+  #   network: matic
+  #   source:
+  #     address: "0xf4a57dac3d3a4772347f813c6bf52b6286ac649e"
+  #     abi: FounderPass
+  #     startBlock: 24701870
+  #   mapping:
+  #     kind: ethereum/events
+  #     apiVersion: 0.0.6
+  #     language: wasm/assemblyscript
+  #     entities:
+  #       - Transfer
+  #     abis:
+  #       - name: FounderPass
+  #         file: ./abis/FounderPass.json
+  #     eventHandlers:
+  #       - event: Transfer(indexed address,indexed address,indexed uint256)
+  #         handler: handleTransfer
+  #     file: ./src/founderpass-mapping.ts
   - kind: ethereum
     name: MnA
     network: matic
     source:
-      address: "0xa6e3d49f2788c5e130664130e852c9dc895abf3b" # test
+      address: "0xdbe147fc80b49871e2a8D60cc89D51b11bc88b35"
       abi: MnA
-        #startBlock: 24809267 # last mint
-      startBlock: 24796198	
+      startBlock: 24837320
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

@@ -1,5 +1,5 @@
-import { Address, BigInt, log } from '@graphprotocol/graph-ts'
-import { Transfer } from '../generated/FounderPass/FounderPass'
+import { Address, BigInt, Contract, log } from '@graphprotocol/graph-ts'
+import { Transfer, FounderPass } from '../generated/FounderPass/FounderPass'
 import { Game, Player, Token } from '../generated/schema'
 import { ADDRESS_ZERO, ONE_BI, NAME_PASS } from './util/constants'
 import { loadGame, tokenIdErc721 } from './util/helpers'
@@ -41,6 +41,14 @@ export function handleTransfer(event: Transfer): void {
   const game = loadGame()
   let token = Token.load(compositeTokenId)
   if (token == null) {
+    const contract = Contract.load(contractAddress)
+    if (contract == null) {
+      const c = new Contract(contractAddress)
+      const fp = FounderPass.bind(event.address)
+      c.name = fp._name
+      c.save()
+    }
+
     token = initToken(event)
   }
 

@@ -57,4 +57,5 @@ type Token @entity {
 
 type Contract @entity {
   id: ID!
+  name: String!
 }
