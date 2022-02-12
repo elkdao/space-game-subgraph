@@ -1,6 +1,6 @@
-import { Address, BigInt, Contract, log } from '@graphprotocol/graph-ts'
+import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { Transfer, FounderPass } from '../generated/FounderPass/FounderPass'
-import { Game, Player, Token } from '../generated/schema'
+import { Contract, Game, Player, Token } from '../generated/schema'
 import { ADDRESS_ZERO, ONE_BI, NAME_PASS } from './util/constants'
 import { loadGame, tokenIdErc721 } from './util/helpers'
 import { initPlayer } from './mna-mapping'
