@@ -103,16 +103,6 @@ function handleTokenMinted(
   caller.mints = caller.mints.plus(ONE_BI)
   caller.save()
 
-  // let metadata = ''
-  // const contract = MnA.bind(contractAddress)
-  // const result = contract.try_tokenURI(tokenId)
-  // if (result.reverted) {
-  //   log.info('Could not fetch tokenURI for tokenId {}', [tokenId.toString()])
-  // } else {
-  //   const base64 = result.value.slice(29, result.value.length)
-  //   metadata = base64Decode(base64)
-  // }
-
   const token = initToken(
     contractAddress.toHexString(),
     compositeTokenId,
@@ -227,6 +217,7 @@ export function handleTransfer(event: Transfer): void {
     if (prevOwner == null) {
       prevOwner = initPlayer(from)
     }
+
     prevOwner.numTokensLost = prevOwner.numTokensLost.plus(ONE_BI)
   }
 
@@ -235,6 +226,17 @@ export function handleTransfer(event: Transfer): void {
 
   if (prevOwner != null) {
     prevOwner.save()
+  }
+
+  if (token.metadata == null || token.metadata == '') {
+    const contract = MnA.bind(event.address)
+    const result = contract.try_tokenURI(event.params.tokenId)
+    if (result.reverted) {
+      log.info('Could not fetch tokenURI for tokenId {}', [tokenId.toString()])
+    } else {
+      const base64 = result.value.slice(29, result.value.length)
+      token.metadata = base64Decode(base64)
+    }
   }
 
   token.owner = newOwner.id

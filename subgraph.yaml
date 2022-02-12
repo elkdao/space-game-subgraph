@@ -1,7 +1,7 @@
 specVersion: 0.0.2
-# graft:
-#   base: QmRJ93qRbi5dSFHtArFLWwkkxW4ondxq8XZP1yYcrrxdw1
-#   block: 24836209
+graft:
+  base: QmccxfKZgzBkvu9RTzcFKbKC4VoXbRoHXhYYk4LkQC4Dn1
+  block: 24852099
 schema:
   file: ./schema.graphql
 dataSources:
@@ -31,7 +31,7 @@ dataSources:
     source:
       address: "0xdbe147fc80b49871e2a8D60cc89D51b11bc88b35"
       abi: MnA
-      startBlock: 24837320
+      startBlock: 24836217
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
