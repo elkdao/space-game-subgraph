@@ -11,7 +11,9 @@ import {
   ONE_BI,
   ZERO_BI,
   TRAIT_TYPE,
-  TRAIT_VALUE
+  TRAIT_VALUE,
+  PROP_IMAGE,
+  PROP_ATTRIBUTES
 } from './util/constants'
 import { base64Decode, loadGame, setRarity, tokenIdErc721 } from './util/helpers'
 import { getObject, getArray, getString, setTrait } from './util/json'
@@ -278,7 +280,10 @@ export function handleTransfer(event: Transfer): void {
         } else {
           // Map attributes to token fields
           const metadata = getObject(parsed.value)
-          const attributes = getArray(metadata.get('attributes'))
+          const attributes = getArray(metadata.get(PROP_ATTRIBUTES))
+
+          // save svg
+          token.image = getString(metadata.get(PROP_IMAGE))
 
           for (let i = 0; i < attributes.length; i++) {
             const trait = getObject(attributes[i])

@@ -21,3 +21,5 @@ export const CONTRACT_SPIDOX = '0x853bf5ad76d3ae766b7c3677fd0819c3a1af3443'
 // JSON
 export const TRAIT_TYPE = 'trait_type'
 export const TRAIT_VALUE = 'value'
+export const PROP_IMAGE = 'image'
+export const PROP_ATTRIBUTES = 'attributes'

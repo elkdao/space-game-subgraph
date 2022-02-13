@@ -61,6 +61,7 @@ type Token @entity {
   rank: BigInt
   emblem: String
   generation: String!
+  image: String!
 }
 
 type Contract @entity {
