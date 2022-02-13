@@ -27,12 +27,11 @@ type Player @entity {
   marinesMinted: BigInt!
   marinesStaked: BigInt!
   marinesStolen: BigInt!
-  mints: BigInt!
   numTokensOwned: BigInt!
+  numTokensMinted: BigInt!
   numTokensLost: BigInt!
   numTokensStolen: BigInt!
   numTokensStaked: BigInt!
-  numTokensMinted: BigInt!
   tokens: [Token!]! @derivedFrom(field: "owner")
   tokensLost: [Token!]! @derivedFrom(field: "victim")
   tokensStolen: [Token!]! @derivedFrom(field: "thief")
@@ -59,4 +58,15 @@ type Token @entity {
 type Contract @entity {
   id: ID!
   name: String!
+}
+
+type FPToken @entity {
+  id: ID!
+  contract: Contract!
+  tokenId: BigInt!
+  mintBlock: BigInt!
+  mintTx: String!
+  mintedAt: BigInt!
+  owner: Player!
+  claimed: Boolean!
 }

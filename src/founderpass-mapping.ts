@@ -1,33 +1,30 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { Transfer, FounderPass } from '../generated/FounderPass/FounderPass'
-import { Contract, Game, Player, Token } from '../generated/schema'
+import { Contract, Player, FPToken } from '../generated/schema'
 import { ADDRESS_ZERO, ONE_BI, NAME_PASS } from './util/constants'
 import { loadGame, tokenIdErc721 } from './util/helpers'
 import { initPlayer } from './mna-mapping'
 
-function incrementTokensOwned(player: Player): void {
+function incrementFPTokensOwned(player: Player): void {
   player.founderPassOwned = player.founderPassOwned.plus(ONE_BI)
 }
 
-function decrementTokensOwned(player: Player): void {
+function decrementFPTokensOwned(player: Player): void {
   player.founderPassOwned = player.founderPassOwned.minus(ONE_BI)
 }
 
-function initToken(event: Transfer): Token {
+function initFPToken(event: Transfer): FPToken {
   const contractAddress = event.address.toHexString()
   const tokenId = event.params.tokenId.toString()
-  const compositeTokenId = tokenIdErc721(contractAddress, tokenId)
+  const compositeFPTokenId = tokenIdErc721(contractAddress, tokenId)
 
-  const t = new Token(compositeTokenId)
+  const t = new FPToken(compositeFPTokenId)
   t.contract = contractAddress
-  t.typ = NAME_PASS
   t.tokenId = event.params.tokenId
-  t.balance = ONE_BI
-  t.mintBlock = event.block.number
   t.mintTx = event.transaction.hash.toHexString()
   t.mintedAt = event.block.timestamp
   t.owner = event.params.to.toHexString()
-  t.isStaked = false
+  t.claimed = false
 
   return t
 }
@@ -36,10 +33,10 @@ export function handleTransfer(event: Transfer): void {
   const callerAddress = event.transaction.from.toHexString()
   const contractAddress = event.address.toHexString()
   const tokenId = event.params.tokenId.toString()
-  const compositeTokenId = tokenIdErc721(contractAddress, tokenId)
+  const compositeFPTokenId = tokenIdErc721(contractAddress, tokenId)
 
   const game = loadGame()
-  let token = Token.load(compositeTokenId)
+  let token = FPToken.load(compositeFPTokenId)
   if (token == null) {
     const contract = Contract.load(contractAddress)
     if (contract == null) {
@@ -49,7 +46,7 @@ export function handleTransfer(event: Transfer): void {
       c.save()
     }
 
-    token = initToken(event)
+    token = initFPToken(event)
   }
 
   const to = event.params.to.toHexString()
@@ -64,20 +61,21 @@ export function handleTransfer(event: Transfer): void {
   if (isNewMint) {
     game.founderPassMinted = game.founderPassMinted.plus(ONE_BI)
     newOwner.founderPassMinted = newOwner.founderPassMinted.plus(ONE_BI)
+    newOwner.numTokensMinted = newOwner.numTokensMinted.plus(ONE_BI)
   } else {
     let prevOwner = Player.load(from)
     if (prevOwner == null) {
       // this should never happen
       prevOwner = initPlayer(from)
-      incrementTokensOwned(prevOwner)
+      incrementFPTokensOwned(prevOwner)
       game.numPlayers = game.numPlayers.plus(ONE_BI)
     }
 
-    decrementTokensOwned(prevOwner)
+    decrementFPTokensOwned(prevOwner)
     prevOwner.save()
   }
 
-  incrementTokensOwned(newOwner)
+  incrementFPTokensOwned(newOwner)
   newOwner.save()
 
   token.owner = newOwner.id
