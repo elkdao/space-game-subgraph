@@ -9,10 +9,15 @@ export const ONE_BD = BigDecimal.fromString('1')
 
 // Game constants
 export const GAME_ID = 'SpaceGame'
+export const RARITIES_ID = '0'
+
 export const NAME_ALIEN = 'Alien'
 export const NAME_PASS = 'FounderPass'
 export const NAME_MARINE = 'Marine'
 export const CONTRACT_PASS = '0xf4a57dac3d3a4772347f813c6bf52b6286ac649e'
+export const CONTRACT_MNA = '0xdbe147fc80b49871e2a8D60cc89D51b11bc88b35'
+export const CONTRACT_SPIDOX = '0x853bf5ad76d3ae766b7c3677fd0819c3a1af3443'
 
-// TODO: replace with real contract address;
-export const MNA_CONTRACT = ADDRESS_ZERO
+// JSON
+export const TRAIT_TYPE = 'trait_type'
+export const TRAIT_VALUE = 'value'

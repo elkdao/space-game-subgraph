@@ -1,5 +1,6 @@
-import { Game } from '../../generated/schema'
-import { GAME_ID, ZERO_BI } from './constants'
+import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { Game, Trait } from '../../generated/schema'
+import { GAME_ID, ONE_BI, ZERO_BI, ZERO_BD, NAME_MARINE, NAME_ALIEN } from './constants'
 import { decode } from 'as-base64'
 
 export function tokenIdErc721(contract: string, tokenId: string): string {
@@ -33,4 +34,39 @@ export function base64Decode(encoded: string): string {
   }
 
   return str
+}
+
+export function setRarity(tokenType: string, traitType: string, name: string): void {
+  if (tokenType == name) {
+    // skip the 'Type' trait
+    return
+  }
+
+  const game = loadGame()
+  let total = ZERO_BI
+  if (tokenType == NAME_MARINE) {
+    //total = game.marinesMinted
+    total = BigInt.fromString('6250')
+  } else if (tokenType == NAME_ALIEN) {
+    //total = game.aliensMinted
+    total = BigInt.fromString('719')
+  }
+
+  const id = tokenType.concat('-').concat(name)
+  let trait = Trait.load(id)
+  if (trait == null) {
+    trait = new Trait(id)
+    trait.tokenTyp = tokenType
+    trait.typ = traitType
+    trait.name = name
+    trait.count = ZERO_BI
+    trait.rarity = ZERO_BD
+  }
+
+  trait.count = trait.count.plus(ONE_BI)
+  const countBd = trait.count.toBigDecimal()
+  const totalBd = total.toBigDecimal()
+  trait.rarity = countBd.div(totalBd)
+
+  trait.save()
 }

@@ -53,6 +53,14 @@ type Token @entity {
   victim: Player
   thief: Player
   metadata: String
+  weaponMouth: String!
+  headgear: String!
+  body: String!
+  back: String!
+  eyes: String!
+  rank: BigInt
+  emblem: String
+  generation: String!
 }
 
 type Contract @entity {
@@ -69,4 +77,13 @@ type FPToken @entity {
   mintedAt: BigInt!
   owner: Player!
   claimed: Boolean!
+}
+
+type Trait @entity {
+  id: ID!
+  tokenTyp: String!
+  typ: String!
+  name: String!
+  count: BigInt!
+  rarity: BigDecimal!
 }

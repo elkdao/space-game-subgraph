@@ -1,10 +1,20 @@
-import { Address, BigInt, log, json, JSONValueKind } from '@graphprotocol/graph-ts'
-import { AlienMinted, AlienStolen, Transfer, MarineMinted, MarineStolen, MnA } from '../generated/MnA/MnA'
+import { Address, BigInt, log, json } from '@graphprotocol/graph-ts'
+import { AlienMinted, Transfer, MarineMinted, MnA } from '../generated/MnA/MnA'
 
 import { Contract, Player, Token, FPToken } from '../generated/schema'
 
-import { ADDRESS_ZERO, NAME_ALIEN, NAME_MARINE, CONTRACT_PASS, ONE_BI, ZERO_BI } from './util/constants'
-import { base64Decode, loadGame, tokenIdErc721 } from './util/helpers'
+import {
+  ADDRESS_ZERO,
+  CONTRACT_PASS,
+  NAME_ALIEN,
+  NAME_MARINE,
+  ONE_BI,
+  ZERO_BI,
+  TRAIT_TYPE,
+  TRAIT_VALUE
+} from './util/constants'
+import { base64Decode, loadGame, setRarity, tokenIdErc721 } from './util/helpers'
+import { getObject, getArray, getString, setTrait } from './util/json'
 
 export function initPlayer(id: string): Player {
   const player = new Player(id)
@@ -233,7 +243,7 @@ export function handleTransfer(event: Transfer): void {
     // This is a claim
     const fpContract = Contract.load(CONTRACT_PASS)
     if (fpContract == null) {
-      log.info('Could load FounderPass contract', [])
+      log.info('Could not load FounderPass contract', [])
     } else {
       // Load the corresponding FP token and mark it claimed
       const tokenId = CONTRACT_PASS.concat('-').concat(event.params.tokenId.toString())
@@ -248,16 +258,39 @@ export function handleTransfer(event: Transfer): void {
   }
 
   // Get metadata
-  // if (token.metadata == null || token.metadata == '') {
-  //   const contract = MnA.bind(event.address)
-  //   const result = contract.try_tokenURI(event.params.tokenId)
-  //   if (result.reverted) {
-  //     log.info('Could not fetch tokenURI for tokenId {}', [tokenId.toString()])
-  //   } else {
-  //     const base64 = result.value.slice(29, result.value.length)
-  //     token.metadata = base64Decode(base64)
-  //   }
-  // }
+  if (token.metadata == null || token.metadata == '') {
+    const contract = MnA.bind(event.address)
+
+    // Try to pull token URI from contract
+    const result = contract.try_tokenURI(event.params.tokenId)
+    if (result.reverted) {
+      log.info('Could not fetch tokenURI for tokenId {}', [tokenId.toString()])
+    } else {
+      // trim MIME_TYPE
+      const base64 = result.value.slice(29, result.value.length)
+      const meta = base64Decode(base64)
+
+      if (meta != null) {
+        // Parse the base64 decoded json
+        const parsed = json.try_fromString(meta)
+        if (parsed.isError) {
+          log.info('Could not parse json', [])
+        } else {
+          // Map attributes to token fields
+          const metadata = getObject(parsed.value)
+          const attributes = getArray(metadata.get('attributes'))
+
+          for (let i = 0; i < attributes.length; i++) {
+            const trait = getObject(attributes[i])
+            const name = getString(trait.get(TRAIT_TYPE))
+            const value = getString(trait.get(TRAIT_VALUE))
+            setTrait(token, name, value)
+            setRarity(token.typ, name, value)
+          }
+        }
+      }
+    }
+  }
 
   token.owner = newOwner.id
   token.save()
