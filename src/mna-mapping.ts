@@ -65,6 +65,7 @@ function initToken(
   token.mintTx = tx
   token.mintedAt = mintedAt
   token.metadata = metadata
+  token.image = ''
 
   return token
 }
@@ -260,7 +261,7 @@ export function handleTransfer(event: Transfer): void {
   }
 
   // Get metadata
-  if (token.metadata == null || token.metadata == '') {
+  if (token.image == null || token.image == '') {
     const contract = MnA.bind(event.address)
 
     // Try to pull token URI from contract

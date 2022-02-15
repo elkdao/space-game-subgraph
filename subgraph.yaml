@@ -1,7 +1,7 @@
 specVersion: 0.0.2
-# graft:
-#   base: QmccxfKZgzBkvu9RTzcFKbKC4VoXbRoHXhYYk4LkQC4Dn1
-#   block: 24852099
+graft:
+  base: QmTcK4D1WT3MFFjKxAcc1u5oSypZs4fki2JTDcFBkHZYye
+  block: 24952086
 schema:
   file: ./schema.graphql
 dataSources:
