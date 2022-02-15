@@ -9,8 +9,9 @@ type Game @entity {
   marinesStolen: BigInt!
   mintsCommitted: BigInt!
   mintsRevealed: BigInt!
-  oresClaimed: BigInt!
   numPlayers: BigInt!
+  oresClaimed: BigInt!
+  spidoxMinted: BigInt!
 }
 
 type Player @entity {
@@ -32,6 +33,8 @@ type Player @entity {
   numTokensLost: BigInt!
   numTokensStolen: BigInt!
   numTokensStaked: BigInt!
+  spidoxOwned: BigInt!
+  spidoxMinted: BigInt!
   tokens: [Token!]! @derivedFrom(field: "owner")
   tokensLost: [Token!]! @derivedFrom(field: "victim")
   tokensStolen: [Token!]! @derivedFrom(field: "thief")
@@ -62,6 +65,7 @@ type Token @entity {
   emblem: String
   generation: String!
   image: String
+  oresClaimed: BigInt!
 }
 
 type Contract @entity {
@@ -87,4 +91,14 @@ type Trait @entity {
   name: String!
   count: BigInt!
   rarity: BigDecimal!
+}
+
+type SpidoxToken @entity {
+  id: ID!
+  contract: Contract!
+  tokenId: BigInt!
+  mintBlock: BigInt!
+  mintTx: String!
+  mintedAt: BigInt!
+  owner: Player!
 }

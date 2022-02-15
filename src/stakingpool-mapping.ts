@@ -76,6 +76,9 @@ function handleClaim(isMarine: boolean, tokenId: string, isUnstaked: boolean, or
 
   player.oresClaimed = player.oresClaimed.plus(oresClaimed)
   player.save()
+
+  token.oresClaimed = token.oresClaimed.plus(oresClaimed)
+  token.save()
 }
 
 export function handleAlienClaimed(event: AlienClaimed): void {

@@ -26,6 +26,26 @@ dataSources:
           handler: handleTransfer
       file: ./src/founderpass-mapping.ts
   - kind: ethereum
+    name: Spidox
+    network: matic
+    source:
+      address: "0x853bf5ad76d3ae766b7c3677fd0819c3a1af3443"
+      abi: Spidox
+      startBlock: 24859348
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+      abis:
+        - name: Spidox
+          file: ./abis/Spidox.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/spidox-mapping.ts
+  - kind: ethereum
     name: MnA
     network: matic
     source:

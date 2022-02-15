@@ -50,8 +50,7 @@ function initToken(
   owner: string,
   tx: string,
   mintedAt: BigInt,
-  block: BigInt,
-  metadata: string
+  block: BigInt
 ): Token {
   const token = new Token(id)
   token.contract = contractAddress
@@ -64,7 +63,8 @@ function initToken(
   token.mintBlock = block
   token.mintTx = tx
   token.mintedAt = mintedAt
-  token.metadata = metadata
+  token.metadata = ''
+  token.oresClaimed = ZERO_BI
   token.image = ''
 
   return token
@@ -124,8 +124,7 @@ function handleTokenMinted(
     caller.id,
     tx,
     timestamp,
-    block,
-    ''
+    block
   )
 
   token.save()

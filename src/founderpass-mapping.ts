@@ -1,7 +1,6 @@
-import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { Transfer, FounderPass } from '../generated/FounderPass/FounderPass'
 import { Contract, Player, FPToken } from '../generated/schema'
-import { ADDRESS_ZERO, ONE_BI, NAME_PASS } from './util/constants'
+import { ADDRESS_ZERO, ONE_BI } from './util/constants'
 import { loadGame, tokenIdErc721 } from './util/helpers'
 import { initPlayer } from './mna-mapping'
 
@@ -61,6 +60,8 @@ export function handleTransfer(event: Transfer): void {
   if (isNewMint) {
     game.founderPassMinted = game.founderPassMinted.plus(ONE_BI)
     newOwner.founderPassMinted = newOwner.founderPassMinted.plus(ONE_BI)
+
+    // These get traded for marines / aliens so count them towards minting those
     newOwner.numTokensMinted = newOwner.numTokensMinted.plus(ONE_BI)
   } else {
     let prevOwner = Player.load(from)
